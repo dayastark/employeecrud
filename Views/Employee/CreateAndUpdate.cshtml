@@ -1,0 +1,60 @@
+﻿@model EmployeeCrud.Models.UserViewModel
+
+<div class="row">
+    <div class="col-md-6 col-lg-offset-3" style="padding-top: 50px;">
+
+        <h2>Add New Employee</h2>
+        <br /><br />
+
+
+        @using (Html.BeginForm("CreateAndUpdate", "Employee", FormMethod.Post,
+            new { @class = "form-horizontal", @autocomplete = "on" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.UserId)
+
+            @Html.ValidationSummary(false, "", new { @class = "text-danger" });
+
+            if (Model.UserId > 0)
+            {
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Employee)
+                    @Html.DropDownListFor(m => m.Employee, (SelectList)ViewBag.EmployeeList, new { @class = "form-control", @readonly="true" })
+                    @Html.ValidationMessageFor(m => m.Employee, "", new { @class = "text-danger" })
+                </div>
+            }
+            else
+            {
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Employee)
+                    @Html.DropDownListFor(m => m.Employee, (SelectList)ViewBag.EmployeeList, new { @class = "form-control", })
+                    @Html.ValidationMessageFor(m => m.Employee, "", new { @class = "text-danger" })
+                </div>
+            }
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.DeliveryAmount)
+                @Html.TextBoxFor(m => m.DeliveryAmount, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.DeliveryAmount, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.EffectiveDate)
+                @Html.TextBoxFor(m => m.EffectiveDate, new { @class = "form-control", @type = "text" })
+                @Html.ValidationMessageFor(m => m.EffectiveDate, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.EndDate)
+                @Html.TextBoxFor(m => m.EndDate, new { @class = "form-control", @type = "text" })
+                @Html.ValidationMessageFor(m => m.EndDate, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                <input type="submit" class="btn btn-success" value="Save" />
+                <a href="/employee/index" class="btn btn-primary">Go Back</a>
+            </div>
+
+        }
+    </div>
+</div>

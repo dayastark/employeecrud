@@ -1,0 +1,54 @@
+﻿@model IEnumerable<EmployeeCrud.Models.UserViewModel>
+
+
+<div style="margin:20px;">
+
+    <a href="/employee/createandupdate" class="btn btn-primary" style="margin-bottom: 20px;">
+        <i class="glyphicon glyphicon-plus"></i> Add New Record
+    </a>
+
+
+    <table class="table table-bordered" id="employee-table">
+
+        <thead>
+            <tr>
+                <td>Id</td>
+                <td>Employee</td>
+                <td>Amount</td>
+                <td>Effective Date</td>
+                <td>Del Date</td>
+                <td>Program Desc</td>
+                <td>Program Group</td>
+                <td>Status</td>
+                <td>Action</td>
+            </tr>
+
+        </thead>
+        <tbody>
+
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.ExternalId</td>
+                    <td>@user.Employee</td>
+                    <td>@user.DeliveryAmount</td>
+                    <td>@user.EffectiveDate</td>
+                    <td>@user.EndDate</td>
+                    <td>@user.Description</td>
+                    <td>@user.Group</td>
+                    <td>@user.Status</td>
+                    <td>
+                        <a href="/employee/createandupdate/@user.UserId" class="btn btn-success btn-sm">
+                            <i class="glyphicon glyphicon-pencil"></i> Edit
+                        </a>
+                        <a href="/employee/createandupdate/@user.UserId" class="btn btn-danger btn-sm">
+                            <i class="glyphicon glyphicon-trash"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+</div>
+

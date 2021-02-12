@@ -1,0 +1,26 @@
+﻿@using EmployeeCrud.Models;
+@{
+    ViewBag.Title = "Home Page";
+    var users = ViewBag.UserList == null ? new List<User>() : (List<User>)ViewBag.UserList;
+}
+
+
+    <div class="row">
+        <div class="text-center col-md-12">
+            <img src="~/Content/1200-x-500-logo-slider-2.png" class="logo" />
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 100px;">
+        <div class="text-center col-md-3 col-md-offset-5">
+            <div class="form-group">
+                <select class="form-control" onchange="changeUser(this);" >
+                    <option value="-1">-- Select User -- </option>
+                    @foreach(var user in users)
+                    {
+                        <option value="@(user.FirstName +"-"+ user.LastName)">@user.FirstName @user.LastName</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
