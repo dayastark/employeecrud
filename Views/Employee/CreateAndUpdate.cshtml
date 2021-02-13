@@ -19,7 +19,7 @@
             {
                 <div class="form-group">
                     @Html.LabelFor(m => m.Employee)
-                    @Html.DropDownListFor(m => m.Employee, (SelectList)ViewBag.EmployeeList, new { @class = "form-control", @readonly="true" })
+                    @Html.DropDownListFor(m => m.Employee, (SelectList)ViewBag.EmployeeList, new { @class = "form-control", @readonly = "true" })
                     @Html.ValidationMessageFor(m => m.Employee, "", new { @class = "text-danger" })
                 </div>
             }
@@ -34,19 +34,28 @@
 
             <div class="form-group">
                 @Html.LabelFor(m => m.DeliveryAmount)
-                @Html.TextBoxFor(m => m.DeliveryAmount, new { @class = "form-control" })
+                @Html.TextBoxFor(m => m.DeliveryAmount, new
+                {
+                    @class = "form-control",
+                    @type = "number",
+                    @pattern = "^[0-9]",
+                    @placeholder = "Only Number",
+                    @min = "1",
+                    @step = "1",
+                @onkeypress = "return isNumberKey(event)"
+                })
                 @Html.ValidationMessageFor(m => m.DeliveryAmount, "", new { @class = "text-danger" })
             </div>
 
             <div class="form-group">
                 @Html.LabelFor(m => m.EffectiveDate)
-                @Html.TextBoxFor(m => m.EffectiveDate, new { @class = "form-control", @type = "text" })
+                @Html.TextBoxFor(m => m.EffectiveDate, new { @class = "form-control datepicker", @type = "text" })
                 @Html.ValidationMessageFor(m => m.EffectiveDate, "", new { @class = "text-danger" })
             </div>
 
             <div class="form-group">
                 @Html.LabelFor(m => m.EndDate)
-                @Html.TextBoxFor(m => m.EndDate, new { @class = "form-control", @type = "text" })
+                @Html.TextBoxFor(m => m.EndDate, new { @class = "form-control datepicker", @type = "text" })
                 @Html.ValidationMessageFor(m => m.EndDate, "", new { @class = "text-danger" })
             </div>
 

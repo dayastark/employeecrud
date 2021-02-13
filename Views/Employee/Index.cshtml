@@ -32,8 +32,8 @@
                     <td>@user.ExternalId</td>
                     <td>@user.Employee</td>
                     <td>@user.DeliveryAmount</td>
-                    <td>@user.EffectiveDate</td>
-                    <td>@user.EndDate</td>
+                    <td>@user.EffectiveDate.Replace(" 00:00:00", "")</td>
+                    <td>@user.EndDate.Replace(" 00:00:00", "")</td>
                     <td>@user.Description</td>
                     <td>@user.Group</td>
                     <td>@user.Status</td>
@@ -41,7 +41,7 @@
                         <a href="/employee/createandupdate/@user.UserId" class="btn btn-success btn-sm">
                             <i class="glyphicon glyphicon-pencil"></i> Edit
                         </a>
-                        <a href="/employee/createandupdate/@user.UserId" class="btn btn-danger btn-sm">
+                        <a href="/employee/delete?id=@user.UserId&employeename=@user.Employee" class="btn btn-danger btn-sm">
                             <i class="glyphicon glyphicon-trash"></i> Delete
                         </a>
                     </td>

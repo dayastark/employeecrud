@@ -4,13 +4,17 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Web;
 
 namespace EmployeeCrud.Models
 {
     public class DataAccessLayer
     {
         private readonly string connectionString = ConfigurationManager.ConnectionStrings["EmployeeContext"].ConnectionString;
+
         private SqlConnection connection;
         private SqlCommand sqlCommand;
 
@@ -102,8 +106,8 @@ namespace EmployeeCrud.Models
                             Employee = sqlDataReader["employee"].ToString(),
                             ExternalId = sqlDataReader["Empl_external_id"].ToString(),
                             DeliveryAmount = sqlDataReader["svc_delivery_amount"].ToString(),
-                            EffectiveDate = Convert.ToDateTime(sqlDataReader["svc_del_effectivedate"].ToString()),
-                            EndDate = Convert.ToDateTime(sqlDataReader["svc_del_enddate"].ToString()),
+                            EffectiveDate = sqlDataReader["svc_del_effectivedate"].ToString(),
+                            EndDate = sqlDataReader["svc_del_enddate"].ToString(),
                             Description = sqlDataReader["program_desc"].ToString(),
                             Group = sqlDataReader["program_group"].ToString(),
                             Status = sqlDataReader["emp_status"].ToString()
@@ -125,7 +129,7 @@ namespace EmployeeCrud.Models
             }
         }
 
-        public UserViewModel GetEmployeeById(int Id)
+        public UserViewModel GetUserById(int Id)
         {
             connection = new SqlConnection(connectionString);
             connection.Open();
@@ -153,8 +157,8 @@ namespace EmployeeCrud.Models
                         Employee = sqlDataReader["emp_id"].ToString(),
                         ExternalId = sqlDataReader["Empl_external_id"].ToString(),
                         DeliveryAmount = sqlDataReader["svc_delivery_amount"].ToString(),
-                        EffectiveDate = Convert.ToDateTime(sqlDataReader["svc_del_effectivedate"].ToString()),
-                        EndDate = Convert.ToDateTime(sqlDataReader["svc_del_enddate"].ToString()),
+                        EffectiveDate = sqlDataReader["svc_del_effectivedate"].ToString(),
+                        EndDate =sqlDataReader["svc_del_enddate"].ToString(),
                         Description = sqlDataReader["program_desc"].ToString(),
                         Group = sqlDataReader["program_group"].ToString(),
                         Status = sqlDataReader["emp_status"].ToString()
@@ -170,7 +174,7 @@ namespace EmployeeCrud.Models
             return userViewModel;
         }
 
-        public List<EmployeeViewDetail> GetUserViewModel(string EmpId)
+        public List<EmployeeViewDetail> GetEmployeeViewModels(string EmpId)
         {
             connection = new SqlConnection(connectionString);
             connection.Open();
@@ -214,18 +218,17 @@ namespace EmployeeCrud.Models
         {
             var overLapping = new List<string>();
 
-            string dateTimeFormat = "yyyy/MM/dd";
             var query = new StringBuilder();
             query.Append("SELECT count(*) FROM EmpServiceDeliveryHistorical ");
             query.Append($" WHERE employee='{model.Employee}' and  svc_delivery_amount = '{model.DeliveryAmount}' and");
-            query.Append($" (( '{model.EffectiveDate.ToString(dateTimeFormat)}' BETWEEN convert(date, '{model.EffectiveDate.ToString(dateTimeFormat)}')");
-            query.Append($" and convert(date, '{model.EndDate.ToString(dateTimeFormat)}') or");
-            query.Append($" '{model.EndDate.ToString(dateTimeFormat)}' BETWEEN convert(date, '{model.EffectiveDate.ToString(dateTimeFormat)}')");
-            query.Append($" AND convert(date, '{model.EndDate.ToString(dateTimeFormat)}')) or");
-            query.Append($" (convert(date, '{model.EffectiveDate.ToString(dateTimeFormat)}') BETWEEN ");
-            query.Append($" '{model.EffectiveDate.ToString(dateTimeFormat)}' AND '{model.EndDate.ToString(dateTimeFormat)}' or");
-            query.Append($" convert(date, '{model.EndDate.ToString(dateTimeFormat)}') BETWEEN ");
-            query.Append($" '{model.EffectiveDate.ToString(dateTimeFormat)}' AND '{model.EndDate.ToString(dateTimeFormat)}'))");
+            query.Append($" (( '{model.EffectiveDate}' BETWEEN convert(date, '{model.EffectiveDate}')");
+            query.Append($" and convert(date, '{model.EndDate}') or");
+            query.Append($" '{model.EndDate}' BETWEEN convert(date, '{model.EffectiveDate}')");
+            query.Append($" AND convert(date, '{model.EndDate}')) or");
+            query.Append($" (convert(date, '{model.EffectiveDate}') BETWEEN ");
+            query.Append($" '{model.EffectiveDate}' AND '{model.EndDate}' or");
+            query.Append($" convert(date, '{model.EndDate}') BETWEEN ");
+            query.Append($" '{model.EffectiveDate}' AND '{model.EndDate}'))");
 
             connection = new SqlConnection(connectionString);
             connection.Open();
@@ -252,17 +255,47 @@ namespace EmployeeCrud.Models
 
         public string CreateUser(UserViewModel model)
         {
+            string userName = HttpContext.Current.Session["User"] as string;
             string result;
             try
             {
                 var users = new List<UserViewModel>();
                 var query = new StringBuilder();
 
+                if(model.UserId > 0)
+                {
+                    query.AppendLine("UPDATE EmpServiceDeliveryHistorical ");
+
+                    query.AppendLine(" SET");
+                    query.AppendLine($" employee = {model.Employee}");
+                    query.AppendLine($" Empl_external_id = {model.ExternalId}");
+                    query.AppendLine($" svc_delivery_amount = {model.DeliveryAmount}");
+                    query.AppendLine($" svc_del_effectivedate = {model.EffectiveDate}");
+                    query.AppendLine($" program_desc = {model.Description}");
+                    query.AppendLine($" program_group = {model.Group}");
+                    query.AppendLine($" emp_status = {model.Status}");
+                    query.AppendLine($" svc_del_enddate = {model.EndDate}");
+
+                    query.AppendLine($" WHERE id = {model.UserId}");
+
+                    connection = new SqlConnection(connectionString);
+                    connection.Open();
+                    sqlCommand = new SqlCommand(query.ToString(), connection);
+
+                    int updated = sqlCommand.ExecuteNonQuery();
+
+                    if (updated > 0)
+                        result = "Successfully Updated Record";
+                    else
+                        result = "Something went wrong";
+                    connection.Close();
+                }
+
                 var overLapping = CheckOverlap(model);
 
                 if (overLapping.Count == 0)
                 {
-                    var employeeViewModels = GetUserViewModel(model.Employee);
+                    var employeeViewModels = GetEmployeeViewModels(model.Employee);
 
                     var newUserViewModels = new List<UserViewModel>();
 
@@ -283,7 +316,6 @@ namespace EmployeeCrud.Models
                         newUserViewModels.Add(userViewModel);
                     }
 
-
                     foreach (var viewModel in newUserViewModels)
                     {
                         query.AppendLine("Insert into EmpServiceDeliveryHistorical ");
@@ -299,12 +331,13 @@ namespace EmployeeCrud.Models
                                 query.Append($", \"{columns[i]}\"");
                         query.Append(") values ");
 
-                        query.Append($"('{viewModel.Employee}','{viewModel.ExternalId}','{viewModel.DeliveryAmount}','{viewModel.EffectiveDate.ToString("yyyy/MM/dd")}',");
-                        query.Append($"'{viewModel.Description}','{viewModel.Group}','{viewModel.Status}','{viewModel.EndDate.ToString("yyyy/MM/dd")}')");
+                        query.Append($"('{viewModel.Employee}','{viewModel.ExternalId}','{viewModel.DeliveryAmount}','{viewModel.EffectiveDate}',");
+                        query.Append($"'{viewModel.Description}','{viewModel.Group}','{viewModel.Status}','{viewModel.EndDate}')");
                         query.Append("\n");
                         query.Append("\n");
-                    }
 
+                        LogError($"{userName} Created: {Environment.NewLine} {viewModel.Employee}| {viewModel.DeliveryAmount} | {viewModel.EffectiveDate} | {viewModel.EndDate}");
+                    }
 
                     connection = new SqlConnection(connectionString);
                     connection.Open();
@@ -329,5 +362,92 @@ namespace EmployeeCrud.Models
             return result;
         }
 
+        public bool DeleteUser(int id, string employeeName)
+        {
+            string userName = HttpContext.Current.Session["User"] as string;
+            
+            var users = new List<UserViewModel>();
+            connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            string sql = $"SELECT * FROM [EmpServiceDeliveryHistorical] where employee = '{employeeName}' order by employee";
+
+            sqlCommand = new SqlCommand(sql, connection);
+
+            SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+
+            while (sqlDataReader.Read())
+            {
+                try
+                {
+                    var user = new UserViewModel()
+                    {
+                        UserId = Convert.ToInt32(sqlDataReader["id"].ToString()),
+                        Employee = sqlDataReader["employee"].ToString(),
+                        ExternalId = sqlDataReader["Empl_external_id"].ToString(),
+                        DeliveryAmount = sqlDataReader["svc_delivery_amount"].ToString(),
+                        EffectiveDate = sqlDataReader["svc_del_effectivedate"].ToString(),
+                        EndDate = sqlDataReader["svc_del_enddate"].ToString(),
+                        Description = sqlDataReader["program_desc"].ToString(),
+                        Group = sqlDataReader["program_group"].ToString(),
+                        Status = sqlDataReader["emp_status"].ToString()
+                    };
+                    users.Add(user);
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+            }
+            sqlDataReader.Close();
+            connection.Close();
+
+            var deleteQuery = new StringBuilder();
+
+            var newUserList = new List<UserViewModel>();
+
+            foreach (var user in users.GroupBy(m => new { m.DeliveryAmount, m.EffectiveDate, m.EndDate }))
+                if(user.Any(m => m.UserId == id))
+                    foreach (var each in user)
+                        newUserList.Add(each);
+
+            foreach (var user in newUserList)
+            {
+                deleteQuery.Append($"Delete from EmpServiceDeliveryHistorical Where id='{user.UserId}'  ");
+                LogError($"Username : {userName} Deleted : {Environment.NewLine + user.Employee} | {user.DeliveryAmount} | {user.EffectiveDate} | {user.EndDate} ");
+            }
+
+            if (!string.IsNullOrEmpty(deleteQuery.ToString()))
+            {
+                connection = new SqlConnection(connectionString);
+                connection.Open();
+                sqlCommand = new SqlCommand(deleteQuery.ToString(), connection);
+                sqlCommand.ExecuteNonQuery();
+                sqlDataReader.Close();
+                connection.Close();
+            }
+            
+            return true;
+        }
+
+        private void LogError(string inputMessage)
+        {
+            string message = string.Format("{0}", DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt"));
+            message += Environment.NewLine;
+            message += "-----------------------------------------------------------";
+            message += Environment.NewLine;
+            message += string.Format("{0}", inputMessage);
+            message += Environment.NewLine;
+            message += "-----------------------------------------------------------";
+            message += Environment.NewLine;
+
+            string path = ConfigurationManager.AppSettings["LISpath"].ToString();
+            string relativepath =  HttpContext.Current.Server.MapPath(path);
+            using (StreamWriter writer = new StreamWriter(relativepath, true))
+            {
+                writer.WriteLine(message);
+                writer.Close();
+            }
+        }
     }
 }

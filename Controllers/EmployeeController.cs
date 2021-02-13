@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Web.Mvc;
 
 namespace EmployeeCrud.Controllers
@@ -21,6 +22,11 @@ namespace EmployeeCrud.Controllers
 
         public ActionResult Index()
         {
+            if (Session["User"] == null)
+            {
+                return RedirectToAction("Index");
+            }
+
             try
             {
                 if (GetUsers.Count == 0)
@@ -44,10 +50,20 @@ namespace EmployeeCrud.Controllers
             if (Id == 0)
                 return View(new UserViewModel());
 
-            var userViewModel = dataAccessLayer.GetEmployeeById(Id);
+            var userViewModel = dataAccessLayer.GetUserById(Id);
             ViewBag.SelectedEmployee = userViewModel.UserId;
             return View(userViewModel);
         }
+
+        private DateTime parseDateTime(string dateTime)
+        {
+            string[] datetimeArray = dateTime.Split('/');
+            int year = Convert.ToInt32(datetimeArray[2]);
+            int day = Convert.ToInt32(datetimeArray[1]);
+            int month = Convert.ToInt32(datetimeArray[0]);
+            return new DateTime(year, month, day);
+        }
+
 
         [HttpPost]
         public ActionResult CreateAndUpdate(UserViewModel model)
@@ -55,44 +71,37 @@ namespace EmployeeCrud.Controllers
             ViewBag.EmployeeList = new SelectList(dataAccessLayer.GetEmployeeList(), "Key", "Value");
             if (ModelState.IsValid)
             {
+                DateTime date1 = parseDateTime(model.EffectiveDate);
+                DateTime date2 = parseDateTime(model.EndDate);
 
-                DateTime date1 = model.EffectiveDate;
-                DateTime date2 = model.EndDate;
                 int result = DateTime.Compare(date1, date2);
                 if (result == 1)
                 {
                     ModelState.AddModelError("", "Start date should be greater than end date");
                     return View(model);
                 }
-
-                string userName = Session["User"] as string;
                 ViewBag.Message = dataAccessLayer.CreateUser(model);
-
-
             }
             return View(model);
         }
 
 
-        private void LogError(string inputMessage)
+        public ActionResult Delete(int id = 0, string employeename = "")
         {
-            string message = string.Format("{0}", DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt"));
-            message += Environment.NewLine;
-            message += "-----------------------------------------------------------";
-            message += Environment.NewLine;
-            message += string.Format("{0}", inputMessage);
-            message += Environment.NewLine;
-            message += "-----------------------------------------------------------";
-            message += Environment.NewLine;
-
-            string path = System.Configuration.ConfigurationManager.AppSettings["LISpath"].ToString();
-            string relativepath = Server.MapPath(path);
-            using (StreamWriter writer = new StreamWriter(relativepath, true))
+            if(id == 0 || string.IsNullOrEmpty(employeename))
             {
-                writer.WriteLine(message);
-                writer.Close();
+                ViewBag.Message = "Please provide Id or Employee Name";
+                return RedirectToAction("Index");
             }
-        }
 
+            bool isDelete = dataAccessLayer.DeleteUser(id, employeename);
+            if(isDelete)
+                ViewBag.Message = "Delete Successfully";
+            else
+                ViewBag.Message = "Something went wrong in Delete";
+
+            Thread.Sleep(3000);
+            return RedirectToAction("Index");
+        }
     }
 }

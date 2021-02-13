@@ -1,5 +1,4 @@
 ﻿using EmployeeCrud.Helper;
-using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace EmployeeCrud.Models
@@ -20,11 +19,11 @@ namespace EmployeeCrud.Models
 
         [Required(ErrorMessage = "Effective Date Required")]
         [Display(Name = "Effective Date")]
-        public DateTime EffectiveDate { get; set; }
+        public string EffectiveDate { get; set; }
 
         [Required(ErrorMessage = "End Date Required")]
         [Display(Name = "End Date")]
-        public DateTime EndDate { get; set; }
+        public string EndDate { get; set; }
 
         public string Description { get; set; }
         public string Group { get; set; }
