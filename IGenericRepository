@@ -1,0 +1,29 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+
+namespace Youthifi.BusinessLogicLayer.Interface
+{
+    public interface IGenericRepository<T> where T : class
+    {
+        Task<IEnumerable<T>> GetAll(
+                            Expression<Func<T, bool>> filter = null,
+                            int pageNumber = 1,
+                            int pageSize = 8,
+                            bool isPaged = true,
+                            Expression<Func<T, T>> select = null,
+                            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+                            string includeProperties = "");
+        Task<T> GetFirst(Expression<Func<T, bool>> filter);
+        Task<T> GetById(string id);
+        Task Add(T obj);
+        Task Add(IEnumerable<T> obj);
+        Task Update(T obj);
+        Task Update(IEnumerable<T> obj);
+        Task Delete(string id);
+        Task DeleteAll();
+        Task<int> GetCount(Expression<Func<T, bool>> filter = null);
+    }
+}
