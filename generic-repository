@@ -1,0 +1,131 @@
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using Youthifi.BusinessLogicLayer.Interface;
+using Youthifi.DataAccessLayer.Models;
+
+namespace Youthifi.BusinessLogicLayer.Services
+{
+    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    {
+        //private readonly DbSet<T> dbSet;
+        //private readonly YouthifiContext context;
+        //public GenericRepository(YouthifiContext context)
+        //{
+        //    this.context = context;
+        //    dbSet = context.Set<T>();
+        //}
+
+        public async Task<IEnumerable<T>> GetAll(
+                            Expression<Func<T, bool>> filter = null, 
+                            int pageNumber = 1,
+                            int pageSize = 8,
+                            bool isPaged = true,
+                            Expression<Func<T, T>> select = null,
+                            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+                            string includeProperties = "")
+        {
+            var context = new YouthifiContext();
+            IQueryable<T> query = context.Set<T>();
+
+            foreach (var inlcudeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                query = query.Include(inlcudeProperty);
+
+            if (filter != null)
+                query = query.Where(filter);
+            
+            if (orderBy != null)
+                query = orderBy(query);
+
+            if (select != null)
+                query = query.Select(select);
+
+            if (isPaged == true)
+                return await query.AsNoTracking().Skip(pageSize * (pageNumber - 1)).Take(pageSize).ToListAsync<T>();
+
+            return await query.AsNoTracking().ToListAsync<T>();
+        }
+
+
+        public async Task<T> GetFirst(Expression<Func<T, bool>> filter)
+        {
+            var context = new YouthifiContext();
+            IQueryable<T> query = context.Set<T>();
+            return await query.FirstOrDefaultAsync(filter);
+        }
+
+        public async Task<T> GetById(string id)
+        {
+            var context = new YouthifiContext();
+            var dbSet = context.Set<T>();
+            return await dbSet.FindAsync(id);
+        }
+
+        public async Task Add(T obj)
+        {
+            var context = new YouthifiContext();
+            var dbSet = context.Set<T>();
+            await dbSet.AddAsync(obj);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task Update(T obj)
+        {
+            var context = new YouthifiContext();
+            var dbSet = context.Set<T>();
+            dbSet.Update(obj);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task Update(IEnumerable<T> obj)
+        {
+            var context = new YouthifiContext();
+            var dbSet = context.Set<T>();
+            dbSet.UpdateRange(obj);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task Delete(string id)
+        {
+            var context = new YouthifiContext();
+            var dbSet = context.Set<T>();
+
+            T existing = await dbSet.FindAsync(id);
+            dbSet.Remove(existing);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task<int> GetCount(Expression<Func<T, bool>> filter = null)
+        {
+            var context = new YouthifiContext();
+            var dbSet = context.Set<T>();
+
+            IQueryable<T> query = dbSet;
+
+            if (filter != null)
+                query = query.Where(filter);
+
+            return await query.CountAsync();
+        }
+
+        public async Task DeleteAll()
+        {
+            var context = new YouthifiContext();
+            var dbSet = context.Set<T>();
+            var medias = await dbSet.AsNoTracking().ToListAsync<T>();
+            dbSet.RemoveRange(medias);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task Add(IEnumerable<T> obj)
+        {
+            var context = new YouthifiContext();
+            var dbSet = context.Set<T>();
+            await dbSet.AddRangeAsync(obj);
+            await context.SaveChangesAsync();
+        }
+    }
+}
