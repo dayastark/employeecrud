@@ -129,3 +129,6 @@ namespace Youthifi.BusinessLogicLayer.Services
         }
     }
 }
+
+
+            services.AddDbContext<YouthifiContext>(m => m.UseMySQL(Configuration.GetConnectionString("YouthifiConnection")), ServiceLifetime.Transient);
