@@ -1,0 +1,136 @@
+.inner-content {
+  position: relative;
+  background: #ffff;
+  padding:20px;
+}
+
+
+.table-style tbody tr:hover {
+  cursor: pointer;
+  color: rgb(189, 3, 3);
+}
+
+.info {
+  border: 1px solid #dee1de;
+  padding: 10px 15px;
+}
+
+.info h5 {
+  margin: 0px !important;
+}
+
+.image {
+  margin: 10px;
+  width: 80%;
+}
+
+.country-details {
+  display: flex;
+}
+
+.country-details div {
+  padding: 5px;
+}
+
+.country-details div h5 {
+  margin: 0;
+}
+
+.country-details img {
+  margin: 0;
+  width: 100%;
+}
+
+
+[nz-button] {
+  margin-right: 8px;
+  margin-bottom: 12px;
+}
+
+.estimate-table .ant-table-thead>tr>th,
+.estimate-table .ant-table-tbody>tr>td,
+.estimate-table .ant-table tfoot>tr>th,
+.estimate-table .ant-table tfoot>tr>td {
+  padding: 5px;
+}
+
+.estimate-table .ant-table tfoot tr {
+  background-color: #dfdeded9;
+  text-align: right;
+}
+
+
+.estimate-table .ant-table>tr th:nth-child(2),
+.estimate-table tbody tr td:nth-child(2) {
+  width: 50%;
+}
+
+
+.estimate-table .ant-table thead tr th:nth-child(3),
+.estimate-table .ant-table thead tr th:nth-child(6),
+.estimate-table .ant-table tbody tr td:nth-child(3),
+.estimate-table .ant-table tbody tr td:nth-child(6) {
+  text-align: right;
+}
+
+
+:host ::ng-deep .upload-list-inline .ant-upload-list-item {
+  float: left;
+  width: 200px;
+  margin-right: 8px;
+}
+
+:host ::ng-deep .upload-list-inline [class*='-upload-list-rtl'] .ant-upload-list-item {
+  float: right;
+}
+
+:host ::ng-deep .upload-list-inline .ant-upload-animate-enter {
+  animation-name: uploadAnimateInlineIn;
+}
+
+:host ::ng-deep .upload-list-inline .ant-upload-animate-leave {
+  animation-name: uploadAnimateInlineOut;
+}
+
+label {
+  margin-right: 5px;
+}
+
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #d6dee1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #a8bbbf;
+}
+
+nz-content {
+  height: 93vh;
+}
+
+.empty-space {
+  width:50%
+}
+
+.app-header-left {
+  width:30%
+}
+
+.table-options {
+  width:100%;
+  text-align: right;
+}
+
+.table-options-in-tabs {
+  position: absolute;
+  right: 0;
+  z-index: 10000;
+}
